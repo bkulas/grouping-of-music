@@ -19,14 +19,15 @@ mot3 = mgr.getSimpleMotives(altoAnalysis,3)
 
 simi = mgr.countSimilar(mot, constant.NOTESNAMES)
 simi3 = mgr.countSimilar(mot3, constant.NOTESNAMES)
+
 esimi = mgr.countExactSimilar(mot)
 esimi3 = mgr.countExactSimilar(mot3)
 
 important = mgr.getImportantMotives(mot,simi,1)
 important3 = mgr.getImportantMotives(mot3,simi3,1)
 
-important = mgr.getImportantMotives(mot,esimi,1)
-important3 = mgr.getImportantMotives(mot3,esimi3,1)
+print(important)
+print(important3)
 
 mgr.removeRepetition(important3)
 

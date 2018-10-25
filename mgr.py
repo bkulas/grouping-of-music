@@ -48,14 +48,7 @@ def getIntervals(notes: list, semitones: list, octaves: list) -> list:
     return (intervals, diatonicIntervals, chromaticIntervals, contour)
 
 def getSimpleMotives(analysis: list, count: int) -> list:
-    motivesNotes = []
-    motivesNotesNames = []
-    motivesIntervals = []
-    motivesDiatonicIntervals = []
-    motivesChromativIntervals = []
-    motivesContour = []
-    motivesRythm4 = []
-    motivesRythm8 = []
+    motives = []
     for i in range(analysis[0].__len__()-(count-1)):
         s1 = []
         s2 = []
@@ -68,24 +61,18 @@ def getSimpleMotives(analysis: list, count: int) -> list:
         for j in range(count):
             s1.append(analysis[0][i+j])
             s2.append(analysis[1][i+j])
-            s7.append(analysis[6][i+j])
-            s8.append(analysis[7][i+j])
         if i<(analysis[0].__len__()-count):
             for j in range(count-1):
                 s3.append(analysis[2][i + j])
                 s4.append(analysis[3][i + j])
                 s5.append(analysis[4][i + j])
                 s6.append(analysis[5][i + j])
-        motivesNotes.append(s1)
-        motivesNotesNames.append(s2)
-        motivesIntervals.append(s3)
-        motivesDiatonicIntervals.append(s4)
-        motivesChromativIntervals.append(s5)
-        motivesContour.append(s6)
-        motivesRythm4.append(s7)
-        motivesRythm8.append(s8)
-    return (motivesNotes, motivesNotesNames, motivesIntervals, motivesDiatonicIntervals,
-            motivesChromativIntervals, motivesContour, motivesRythm4, motivesRythm8)
+        for j in range(count):
+                s7.append(analysis[6][i + j])
+                s8.append(analysis[7][i + j])
+        motives.append([s1,s2,s3, s4,s5,s6,s7,s8])
+    return motives#(motivesNotes, motivesNotesNames, motivesIntervals, motivesDiatonicIntervals,
+            #motivesChromativIntervals, motivesContour, motivesRythm4, motivesRythm8)
 
 def showMotive(motive: list):
     s1 = stream.Measure()
@@ -95,13 +82,12 @@ def showMotive(motive: list):
 #zliczamy podobne motywy na liście motywów analysis wg wartości value
 def countSimilar(analysis: list, value: int ) -> list:
     similars = []
-    for i in range(analysis[value].__len__()):
+    for i in range(analysis.__len__()):
         c = 0
-        for j in range(analysis[value].__len__()):
+        for j in range(analysis.__len__()):
             flag = 0
-            for k in range(analysis[value][0].__len__()):
-                if analysis[value][i][k] != analysis[value][j][k]:
-                    flag = 1
+            if analysis[i][value] != analysis[j][value]:
+                flag = 1
             if flag == 0:
                 c=c+1
         similars.append(c)
@@ -109,12 +95,12 @@ def countSimilar(analysis: list, value: int ) -> list:
 
 def countExactSimilar(analysis: list ) -> list:
     exactSimilars = []
-    for i in range(analysis[0].__len__()):
+    for i in range(analysis.__len__()):
         c = 0
-        for j in range(analysis[0].__len__()):
+        for j in range(analysis.__len__()):
             flag = 0
-            if analysis[3][i] != analysis[3][j] or analysis[4][i] != analysis[4][j]\
-                    or analysis[5][i] != analysis[5][j] or analysis[6][i] != analysis[6][j]:
+            if analysis[i][3] != analysis[j][3] or analysis[i][4] != analysis[j][4]\
+                    or analysis[i][5] != analysis[j][5] or analysis[i][6] != analysis[j][6]:
                 flag = 1
             if flag == 0:
                 c=c+1
@@ -124,16 +110,9 @@ def countExactSimilar(analysis: list ) -> list:
 def getImportantMotives(motives: list, similars: list, value: int) -> list:
     importantMotives = motives
     c = 0
-    for m in range(motives[0].__len__()):
+    for m in range(motives.__len__()):
         if similars[m] == 1:
-            del importantMotives[0][m-c]
-            del importantMotives[1][m-c]
-            del importantMotives[2][m-c]
-            del importantMotives[3][m-c]
-            del importantMotives[4][m-c]
-            del importantMotives[5][m-c]
-            del importantMotives[6][m-c]
-            del importantMotives[7][m-c]
+            del importantMotives[m-c]
             c = c+1
     #removeRepetition(importantMotives)
     return importantMotives
@@ -141,13 +120,14 @@ def getImportantMotives(motives: list, similars: list, value: int) -> list:
 def removeRepetition(motives: list):
     removed = []
     newMotives = []
-    for elem in motives[1]:
+    for elem in motives:
         flag = 0
         for elem2 in newMotives:
-            if elem == elem2:
+            if elem[1] == elem2[1]:
                 removed.append(elem2)
                 flag = 1
                 break
         if flag == 0:
             newMotives.append(elem)
+    return (removed,newMotives)
 
