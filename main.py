@@ -23,13 +23,17 @@ simi3 = mgr.countSimilar(mot3, constant.NOTESNAMES)
 esimi = mgr.countExactSimilar(mot)
 esimi3 = mgr.countExactSimilar(mot3)
 
-important = mgr.getImportantMotives(mot,simi,1)
+important2 = mgr.getImportantMotives(mot,simi,1)
 important3 = mgr.getImportantMotives(mot3,simi3,1)
 
-print(important)
+print(important2)
 print(important3)
 
-mgr.removeRepetition(important3)
+(removed2,newMotives2) = mgr.removeRepetition(important2)
+(removed3,newMotives3) = mgr.removeRepetition(important3)
+
+mgr.createMotiveGraph(newMotives2)
+
 
 #s1 = stream.Measure()
 #s1.TimeSignature = meter.TimeSignature('3/4')

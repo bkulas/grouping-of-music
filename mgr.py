@@ -1,4 +1,5 @@
 from music21 import *
+import networkx as nx
 
 a = converter.parse("tinynotation: 3/4 g4 e e f4 d d c8 e g2 B4 A G")
 b = converter.parse("tinynotation: 3/4 c4 C d")
@@ -58,6 +59,7 @@ def getSimpleMotives(analysis: list, count: int) -> list:
         s6 = []
         s7 = []
         s8 = []
+        s9 = 1
         for j in range(count):
             s1.append(analysis[0][i+j])
             s2.append(analysis[1][i+j])
@@ -70,10 +72,11 @@ def getSimpleMotives(analysis: list, count: int) -> list:
         for j in range(count):
                 s7.append(analysis[6][i + j])
                 s8.append(analysis[7][i + j])
-        motives.append([s1,s2,s3, s4,s5,s6,s7,s8])
+        motives.append([s1,s2,s3, s4,s5,s6,s7,s8,s9])
     return motives#(motivesNotes, motivesNotesNames, motivesIntervals, motivesDiatonicIntervals,
-            #motivesChromativIntervals, motivesContour, motivesRythm4, motivesRythm8)
+            #motivesChromativIntervals, motivesContour, motivesRythm4, motivesRythm8, power)
 
+#motive - lista nut
 def showMotive(motive: list):
     s1 = stream.Measure()
     s1.append(motive)
@@ -117,17 +120,44 @@ def getImportantMotives(motives: list, similars: list, value: int) -> list:
     #removeRepetition(importantMotives)
     return importantMotives
 
+#usuwa dokładne powtórzenia w motywach: takie same nuty, takie same interwały, takie same wartości rytmiczne
 def removeRepetition(motives: list):
     removed = []
     newMotives = []
     for elem in motives:
         flag = 0
         for elem2 in newMotives:
-            if elem[1] == elem2[1]:
-                removed.append(elem2)
+            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6]==elem2[6]:
+                removed.append(elem)
+                newMotives[newMotives.index(elem2)][8] = newMotives[newMotives.index(elem2)][8]+1
                 flag = 1
                 break
         if flag == 0:
             newMotives.append(elem)
     return (removed,newMotives)
+
+#graf reprezentujący motywy i ich wzajemne podobieńśtwo
+#wieszchołki - motywy, krawędzie - liczba wspólnych elementów
+def createMotiveGraph(motives: list):
+    g=nx.Graph()
+    for i in range(motives.__len__()):
+        motives[i].append(i)
+        g.add_node(i)
+    for i in range(motives.__len__()):
+        for j in range(motives.__len__()-i-1):
+            similarity = countSimilarity(motives[i],motives[i+j+1])
+            g.add_edge(motives[i][9],motives[i+j+1][9],weight = similarity)
+    print(g.nodes())
+    print(nx.get_edge_attributes(g,'weight'))
+    #g.add_nodes_from(motives)
+
+def countSimilarity(m1: list, m2: list) -> int:
+#    print("I'm counting similarity")
+    similarity = 0
+    for i in range(m1[1].__len__()):
+#        print('for',m1[1][i], m2[1][i])
+        if m1[1][i] == m2[1][i]:
+#            print('if',m1[1][i], m2[1][i])
+            similarity = similarity+(1/(m1[1].__len__()))
+    return similarity
 
