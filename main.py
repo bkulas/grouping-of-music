@@ -1,6 +1,7 @@
 from music21 import *
 import mgr
 import constant
+import matplotlib.pyplot as plt
 
 bwv295 = corpus.parse('bach/bwv295')
 
@@ -26,13 +27,28 @@ esimi3 = mgr.countExactSimilar(mot3)
 important2 = mgr.getImportantMotives(mot,simi,1)
 important3 = mgr.getImportantMotives(mot3,simi3,1)
 
-print(important2)
-print(important3)
+#print(important2)
+#print(important3)
 
 (removed2,newMotives2) = mgr.removeRepetition(important2)
 (removed3,newMotives3) = mgr.removeRepetition(important3)
 
-mgr.createMotiveGraph(newMotives2)
+motiveGraph = mgr.createMotiveGraph(newMotives2)
+weights2 = [motiveGraph.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph.edges()]
+plt.hist(weights2)
+mgr.reduceMotiveGraph(motiveGraph)
+
+#newMotives2[21][0].show()
+#newMotives2[28][0].show()
+print(newMotives3[0])
+mgr.createMotiveGraph(newMotives3)
+motiveGraph3 = mgr.createMotiveGraph(newMotives3)
+weights3 = [motiveGraph3.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph3.edges()]
+#plt.hist(weights3)
+mgr.reduceMotiveGraph(motiveGraph3)
+
+for m in newMotives3:
+    print(m[9],m[1],m[3],m[6])
 
 
 #s1 = stream.Measure()

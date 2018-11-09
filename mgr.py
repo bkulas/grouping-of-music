@@ -141,23 +141,44 @@ def removeRepetition(motives: list):
 def createMotiveGraph(motives: list):
     g=nx.Graph()
     for i in range(motives.__len__()):
+#        print(motives[i])
         motives[i].append(i)
+#        print(i, motives[i])
         g.add_node(i)
     for i in range(motives.__len__()):
         for j in range(motives.__len__()-i-1):
             similarity = countSimilarity(motives[i],motives[i+j+1])
             g.add_edge(motives[i][9],motives[i+j+1][9],weight = similarity)
-    print(g.nodes())
-    print(nx.get_edge_attributes(g,'weight'))
+#    print(g.nodes())
+#    print(nx.get_edge_attributes(g,'weight'))
+    return g
     #g.add_nodes_from(motives)
 
 def countSimilarity(m1: list, m2: list) -> int:
-#    print("I'm counting similarity")
     similarity = 0
-    for i in range(m1[1].__len__()):
-#        print('for',m1[1][i], m2[1][i])
-        if m1[1][i] == m2[1][i]:
-#            print('if',m1[1][i], m2[1][i])
-            similarity = similarity+(1/(m1[1].__len__()))
+#    for i in range(m1[1].__len__()):
+#        if m1[1][i] == m2[1][i]:
+#            similarity = similarity+(1/(m1[1].__len__()))
+    for i in range(m1[3].__len__()):
+        if m1[3][i] == m2[3][i] and m1[5][i] == m2[5][i]:
+            similarity = similarity+(1/(m1[5].__len__()))
+#    for i in range(m1[4].__len__()):
+        elif m1[4][i] == m2[4][i]:
+            similarity = similarity+(1/(m1[4].__len__()))
+#    for i in range(m1[5].__len__()):
+        elif m1[3][i] == m2[3][i]:
+            similarity = similarity+((1/(m1[3].__len__()))/2)
+    for i in range(m1[6].__len__()-1):
+        if m1[6][i]/m1[6][i+1] == m2[6][i]/m2[6][i+1]:
+            similarity = similarity+(1/((m1[6].__len__())-1))
     return similarity
 
+def reduceMotiveGraph(g: nx.Graph):
+    print("początkowo krawędzi: ", g.number_of_edges())
+    for (u, v, d) in g.edges(data=True):
+        if d['weight'] < 1.5:
+            print("remove: ", d)
+            g.remove_edge(u,v)
+    print("na koniec krawędzi: ", g.number_of_edges())
+    print(g.edges())
+    return g
