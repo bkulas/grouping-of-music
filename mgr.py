@@ -11,10 +11,31 @@ for thisNote in a.recurse().notes:
     thisNote.addLyric(thisNote.pitch.pitchClass) #półtony od C trzeba powiązać z oktawą do interwałów
     thisNote.addLyric(thisNote.pitch.octave)
 
+def analyseComposition(composition):
+    charMotives = []
+    for p in composition.parts:
+        analysis = analyseMelody(p)
+        for i in range(2,8):
+            print(i)
+            if i-2 >= charMotives.__len__():
+                print('add',i)
+                charMotives.append([])
+            motives = getSimpleMotives(analysis,i)
+            important = getImportantMotives(motives)
+            (removed, newMotives) = removeRepetition(important)
+            Mgraph = createMotiveGraph(newMotives)
+            reduceMotiveGraph(Mgraph)
+            motivesGroups = getMotivesGroupsFromGraph(Mgraph)
+            mtv = characteristicMotives(newMotives, motivesGroups)
+            if mtv != [[]]: charMotives[i - 2].append(mtv)
+    return charMotives
+
+
 def countChromatic(first: int, second: int, semitones: list, octaves: list) -> int:
     return semitones[second] - semitones[first] + 12*(octaves[second]-octaves[first])
 
-def analyseMelody(melody):
+def analyseMelody(melody) -> list:
+    print('analysis')
     notesWithOctaves = []
     notesNames = []
     notes = []
@@ -70,8 +91,8 @@ def getSimpleMotives(analysis: list, count: int) -> list:
                 s5.append(analysis[4][i + j])
                 s6.append(analysis[5][i + j])
         for j in range(count):
-                s7.append(analysis[6][i + j])
-                s8.append(analysis[7][i + j])
+            s7.append(analysis[6][i + j])
+            s8.append(analysis[7][i + j])
         motives.append([s1,s2,s3, s4,s5,s6,s7,s8,s9])
     return motives#(motivesNotes, motivesNotesNames, motivesIntervals, motivesDiatonicIntervals,
             #motivesChromativIntervals, motivesContour, motivesRythm4, motivesRythm8, power)
@@ -110,8 +131,10 @@ def countExactSimilar(analysis: list ) -> list:
         exactSimilars.append(c)
     return exactSimilars
 
-def getImportantMotives(motives: list, similars: list, value: int) -> list:
+#zachowujemy tylko te motywy na liście motives, które są podobne wg czterech kryteriów
+def getImportantMotives(motives: list) -> list:
     importantMotives = motives
+    similars = countExactSimilar(motives)
     c = 0
     for m in range(motives.__len__()):
         if similars[m] == 1:
@@ -174,11 +197,42 @@ def countSimilarity(m1: list, m2: list) -> int:
     return similarity
 
 def reduceMotiveGraph(g: nx.Graph):
-    print("początkowo krawędzi: ", g.number_of_edges())
+    #print("początkowo krawędzi: ", g.number_of_edges())
     for (u, v, d) in g.edges(data=True):
         if d['weight'] < 1.5:
-            print("remove: ", d)
             g.remove_edge(u,v)
-    print("na koniec krawędzi: ", g.number_of_edges())
-    print(g.edges())
+    #print("na koniec krawędzi: ", g.number_of_edges())
+    #print(g.edges())
     return g
+
+def getMotivesGroupsFromGraph(g: nx.Graph):
+    motives = []
+    for i in range(g.edges().__len__()):
+        flag = 0
+        for n in range(motives.__len__()):
+            if g.edges()[i][0] in motives[n]:
+                flag = 1
+                if g.edges()[i][1] in motives[n]:
+                    break
+                else: motives[n].append(g.edges()[i][1])
+            elif g.edges()[i][1] in motives[n]:
+                flag = 1
+                if g.edges()[i][0] in motives[n]:
+                    break
+                else: motives[n].append(g.edges()[i][0])
+        if flag == 0: motives.append([g.edges()[i][0],g.edges()[i][1]])
+    #print(motives)
+    return motives
+
+def characteristicMotives(motives: list, indexes: list):
+    characteristic = [[]]
+    for c, i in enumerate(indexes):
+        for m in motives:
+            for j in range(i.__len__()):
+                if m[9] == i[j]:
+                    #print(m)
+                    #print(c)
+                    if c >= characteristic.__len__():
+                        characteristic.append([m])
+                    else: characteristic[c].append(m)
+    return characteristic

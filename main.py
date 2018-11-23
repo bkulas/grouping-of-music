@@ -1,54 +1,80 @@
 from music21 import *
 import mgr
-import constant
-import matplotlib.pyplot as plt
+#import constant
+#import matplotlib.pyplot as plt
 
 bwv295 = corpus.parse('bach/bwv295')
 
-soprano = bwv295.parts[0]
-alto = bwv295.parts[1]
-tenor = bwv295.parts[2]
-basso = bwv295.parts[3]
+a = mgr.analyseComposition(bwv295)
 
-sopranoAnalysis = mgr.analyseMelody(soprano)
-altoAnalysis = mgr.analyseMelody(alto)
-tenorAnalysis = mgr.analyseMelody(tenor)
-bassoAnalysis = mgr.analyseMelody(basso)
+for i in range(a.__len__()):
+    print(a[i])
 
-mot = mgr.getSimpleMotives(altoAnalysis,2)
-mot3 = mgr.getSimpleMotives(altoAnalysis,3)
+#soprano = bwv295.parts[0]
+#alto = bwv295.parts[1]
+#tenor = bwv295.parts[2]
+#basso = bwv295.parts[3]
 
-simi = mgr.countSimilar(mot, constant.NOTESNAMES)
-simi3 = mgr.countSimilar(mot3, constant.NOTESNAMES)
+#sopranoAnalysis = mgr.analyseMelody(soprano)
+#altoAnalysis = mgr.analyseMelody(alto)
+#tenorAnalysis = mgr.analyseMelody(tenor)
+#bassoAnalysis = mgr.analyseMelody(basso)
 
-esimi = mgr.countExactSimilar(mot)
-esimi3 = mgr.countExactSimilar(mot3)
+#mot2 = mgr.getSimpleMotives(altoAnalysis,2)
+#mot3 = mgr.getSimpleMotives(altoAnalysis,3)
+#mot4 = mgr.getSimpleMotives(altoAnalysis,4)
+#mot5 = mgr.getSimpleMotives(altoAnalysis,5)
 
-important2 = mgr.getImportantMotives(mot,simi,1)
-important3 = mgr.getImportantMotives(mot3,simi3,1)
+#important2 = mgr.getImportantMotives(mot2)
+#important3 = mgr.getImportantMotives(mot3)
+#important4 = mgr.getImportantMotives(mot4)
+#important5 = mgr.getImportantMotives(mot5)
+
 
 #print(important2)
 #print(important3)
 
-(removed2,newMotives2) = mgr.removeRepetition(important2)
-(removed3,newMotives3) = mgr.removeRepetition(important3)
+#(removed2,newMotives2) = mgr.removeRepetition(important2)
+#(removed3,newMotives3) = mgr.removeRepetition(important3)
+#(removed4,newMotives4) = mgr.removeRepetition(important4)
+#(removed5,newMotives5) = mgr.removeRepetition(important5)
 
-motiveGraph = mgr.createMotiveGraph(newMotives2)
-weights2 = [motiveGraph.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph.edges()]
-plt.hist(weights2)
-mgr.reduceMotiveGraph(motiveGraph)
+#mgr.createMotiveGraph(newMotives2)
+#motiveGraph2 = mgr.createMotiveGraph(newMotives2)
+#mgr.reduceMotiveGraph(motiveGraph2)
+#ind2 = mgr.getMotivesGroupsFromGraph(motiveGraph2)
+#char2 = mgr.characteristicMotives(newMotives2,ind2)
+
+#mgr.createMotiveGraph(newMotives3)
+#motiveGraph3 = mgr.createMotiveGraph(newMotives3)
+#mgr.reduceMotiveGraph(motiveGraph3)
+#ind3 = mgr.getMotivesGroupsFromGraph(motiveGraph3)
+#char3 = mgr.characteristicMotives(newMotives3,ind3)
+
+#mgr.createMotiveGraph(newMotives4)
+#motiveGraph4 = mgr.createMotiveGraph(newMotives4)
+#mgr.reduceMotiveGraph(motiveGraph4)
+#ind4 = mgr.getMotivesGroupsFromGraph(motiveGraph4)
+#char4 = mgr.characteristicMotives(newMotives4,ind4)
+
+#mgr.createMotiveGraph(newMotives5)
+#motiveGraph5 = mgr.createMotiveGraph(newMotives5)
+#mgr.reduceMotiveGraph(motiveGraph5)
+#ind5 = mgr.getMotivesGroupsFromGraph(motiveGraph5)
+#char5 = mgr.characteristicMotives(newMotives5,ind5)
+
+#print(ind2)
+#for i in range(char2.__len__()):
+#    print(char2[i])
+
+#motiveGraph = mgr.createMotiveGraph(newMotives2)
+#weights2 = [motiveGraph.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph.edges()]
+#plt.hist(weights2)
+#mgr.reduceMotiveGraph(motiveGraph)
 
 #newMotives2[21][0].show()
 #newMotives2[28][0].show()
-print(newMotives3[0])
-mgr.createMotiveGraph(newMotives3)
-motiveGraph3 = mgr.createMotiveGraph(newMotives3)
-weights3 = [motiveGraph3.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph3.edges()]
-#plt.hist(weights3)
-mgr.reduceMotiveGraph(motiveGraph3)
 
-for m in newMotives3:
-    print(m[9],m[1],m[3],m[6])
 
 
 #s1 = stream.Measure()
