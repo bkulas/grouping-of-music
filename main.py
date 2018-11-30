@@ -4,11 +4,19 @@ import mgr
 #import matplotlib.pyplot as plt
 
 bwv295 = corpus.parse('bach/bwv295')
+bwv66 = corpus.parse('bwv66.6')
 
 a = mgr.analyseComposition(bwv295)
+b = mgr.analyseComposition(bwv66)
 
 for i in range(a.__len__()):
     print(a[i])
+    print(b[i])
+
+print("ab")
+mgr.countJaccardIndex(a,b)
+print("ba")
+mgr.countJaccardIndex(b,a)
 
 #soprano = bwv295.parts[0]
 #alto = bwv295.parts[1]

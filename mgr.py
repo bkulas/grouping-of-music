@@ -22,12 +22,12 @@ def analyseComposition(composition):
                 charMotives.append([])
             motives = getSimpleMotives(analysis,i)
             important = getImportantMotives(motives)
-            (removed, newMotives) = removeRepetition(important)
+            newMotives = removeRepetition(important)
             Mgraph = createMotiveGraph(newMotives)
             reduceMotiveGraph(Mgraph)
             motivesGroups = getMotivesGroupsFromGraph(Mgraph)
             mtv = characteristicMotives(newMotives, motivesGroups)
-            if mtv != [[]]: charMotives[i - 2].append(mtv)
+            if mtv != [[]]: charMotives[i - 2].extend(mtv)
     return charMotives
 
 
@@ -150,14 +150,14 @@ def removeRepetition(motives: list):
     for elem in motives:
         flag = 0
         for elem2 in newMotives:
-            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6]==elem2[6]:
+            if elem[3] == elem2[3] and elem[4] == elem2[4] and elem[5] == elem2[5] and elem[6] == elem2[6]:
                 removed.append(elem)
                 newMotives[newMotives.index(elem2)][8] = newMotives[newMotives.index(elem2)][8]+1
                 flag = 1
                 break
         if flag == 0:
             newMotives.append(elem)
-    return (removed,newMotives)
+    return newMotives
 
 #graf reprezentujący motywy i ich wzajemne podobieńśtwo
 #wieszchołki - motywy, krawędzie - liczba wspólnych elementów
@@ -236,3 +236,73 @@ def characteristicMotives(motives: list, indexes: list):
                         characteristic.append([m])
                     else: characteristic[c].append(m)
     return characteristic
+
+#def countJaccardIndex(a: list, b: list):
+#    jaccardIndex = []
+#    for i in range(a.__len__()): #poziom długości motywu
+#        for j in range(a[i].__len__()): #poziom częsci utworu
+#            for k in range(b[i].__len__()):
+#                for l in range(a[i][j].__len__()): #poziom grup motywów
+#                    indexes = []
+#                    for m in range(b[i][k].__len__()):
+#                        index = 0
+#                        sum = (a[i][j][l].__len__()) + (b[i][k][m].__len__())
+#                        for n in range(a[i][j][l].__len__()):
+#                            flag = 0
+#                            for o in range(b[i][k][m].__len__()):
+#                                if a[i][j][l][n][3] == b[i][k][m][o][3] and a[i][j][l][n][4] == b[i][k][m][o][4] \
+#                                    and a[i][j][l][n][5] == b[i][k][m][o][5] and a[i][j][l][n][6] == b[i][k][m][o][6]:
+#                                    index = index + 1
+#                                    sum = sum - 1
+#                        if sum != 0: ind = index/sum
+#                        else: ind = 0
+#                        print(index, sum)
+#                        indexes.append(ind)
+#                jaccardIndex.append(max(indexes))
+#    print(jaccardIndex)
+    #srednia = sum(j for j in jaccardIndex)
+#    print(srednia)
+#    print(sum)
+#    indexJaccarda = index/sum
+#    print(indexJaccarda)
+#    return jaccardIndex
+
+def countJaccardIndex(a: list, b: list):
+    jaccardIndex = []
+    for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
+        if a[i] != []:
+            indexes = []
+            for j in range(a[i].__len__()): # j-ta grupa motywów
+                index_old = 0
+                index_new = 0
+#                for k in range(a[i][j].__len__()): #k-ty motyw
+                for l in range(b[i].__len__()):
+                    index_new = countGroupJaccard(a[i][j], b[i][l])
+                    if index_new > index_old : index_old = index_new
+                indexes.append(index_old)
+            average = sum(indexes)/len(indexes)
+            jaccardIndex.append(average)
+            print(indexes)
+    print(jaccardIndex)
+    return jaccardIndex
+
+#Wyliczam indeks Jaccarda dla dwóch grup: moc iloczynu zbiorów/moc sumy zbiorów
+def countGroupJaccard(group1: list, group2: list) -> float:
+    value = 0
+    sum = group1.__len__() + group2.__len__()
+    product = 0
+    for i in group1:
+        product = product + countJaccard(i, group2)
+    sum = sum - product
+    value = product/sum
+    return value
+
+#Sprawdzenie czy motive znajduje się w grupie group
+#return 1 jeśli tak, 0 jeśli nie
+def countJaccard(motive: list, group: list) -> int:
+    value = 0
+    for i in range(group.__len__()):
+        if motive[3] == group[i][3] and motive[4] == group[i][4] and motive[5] == group[i][5] and motive[6] == group[i][6]:
+            value = 1
+            break
+    return value
