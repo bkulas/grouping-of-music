@@ -5,18 +5,69 @@ import mgr
 
 bwv295 = corpus.parse('bach/bwv295')
 bwv66 = corpus.parse('bwv66.6')
+bwv24511 = corpus.parse('bach/bwv245.11.mxl')
+bwv24514 = corpus.parse('bach/bwv245.14.mxl')
+bwv24515 = corpus.parse('bach/bwv245.15.mxl')
+bwv24517 = corpus.parse('bach/bwv245.17.mxl')
+bwv24522 = corpus.parse('bach/bwv245.22.mxl')
+bwv24526 = corpus.parse('bach/bwv245.26.mxl')
+bwv24528 = corpus.parse('bach/bwv245.28.mxl')
+bwv2453 = corpus.parse('bach/bwv245.3.mxl')
+bwv24537 = corpus.parse('bach/bwv245.37.mxl')
+bwv24540 = corpus.parse('bach/bwv245.40.mxl')
+bwv2455 = corpus.parse('bach/bwv245.5.mxl')
+
+bee132 = corpus.parse('beethoven/opus132.mxl')
+bee133 = corpus.parse('beethoven/opus133.mxl')
+bee591 = corpus.parse('beethoven/opus59no1/movement1.mxl')
 
 a = mgr.analyseComposition(bwv295)
-b = mgr.analyseComposition(bwv66)
+"""b = mgr.analyseComposition(bwv66)
+c = mgr.analyseComposition(bwv24511)
+d = mgr.analyseComposition(bwv24514)
+e = mgr.analyseComposition(bwv24515)"""
+#f = mgr.analyseComposition(bwv24517)
+#g = mgr.analyseComposition(bwv24522)
+#h = mgr.analyseComposition(bwv24526)
+#i = mgr.analyseComposition(bwv24528)
+#j = mgr.analyseComposition(bwv2453)
+#k = mgr.analyseComposition(bwv24537)
+#l = mgr.analyseComposition(bwv24540)
+#m = mgr.analyseComposition(bwv2455)
+
+#b132 = mgr.analyseComposition(bee132)
+#b133 = mgr.analyseComposition(bee133)
+#b591 = mgr.analyseComposition(bee591)
 
 for i in range(a.__len__()):
     print(a[i])
-    print(b[i])
+#    print(b[i])
 
+"""print("aa")
+mgr.countJaccardIndex(a,a)
 print("ab")
 mgr.countJaccardIndex(a,b)
 print("ba")
 mgr.countJaccardIndex(b,a)
+print("ac")
+mgr.countJaccardIndex(a,c)
+print("ad")
+mgr.countJaccardIndex(a,d)
+print("ae")
+mgr.countJaccardIndex(a,e)
+#print("af")
+#mgr.countJaccardIndex(a,f)
+#print("ag")
+#mgr.countJaccardIndex(a,g)
+#print("ah")
+#mgr.countJaccardIndex(a,h)
+#print("bee")
+#mgr.countJaccardIndex(b132,b133)
+#print("bee")
+#mgr.countJaccardIndex(b133,b132)
+#print("abee")
+#mgr.countJaccardIndex(a,b132)"""
+
 
 #soprano = bwv295.parts[0]
 #alto = bwv295.parts[1]

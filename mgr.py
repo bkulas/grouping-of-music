@@ -22,6 +22,7 @@ def analyseComposition(composition):
                 charMotives.append([])
             motives = getSimpleMotives(analysis,i)
             important = getImportantMotives(motives)
+            print('Important ', important)
             newMotives = removeRepetition(important)
             Mgraph = createMotiveGraph(newMotives)
             reduceMotiveGraph(Mgraph)
@@ -35,7 +36,7 @@ def countChromatic(first: int, second: int, semitones: list, octaves: list) -> i
     return semitones[second] - semitones[first] + 12*(octaves[second]-octaves[first])
 
 def analyseMelody(melody) -> list:
-    print('analysis')
+#    print('analysis')
     notesWithOctaves = []
     notesNames = []
     notes = []
@@ -145,19 +146,22 @@ def getImportantMotives(motives: list) -> list:
 
 #usuwa dokładne powtórzenia w motywach: takie same nuty, takie same interwały, takie same wartości rytmiczne
 def removeRepetition(motives: list):
+    print('RemoveRepetition for', motives)
     removed = []
-    newMotives = []
+    newM = []
     for elem in motives:
         flag = 0
-        for elem2 in newMotives:
-            if elem[3] == elem2[3] and elem[4] == elem2[4] and elem[5] == elem2[5] and elem[6] == elem2[6]:
+        for elem2 in newM:
+            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6] == elem2[6]:
+#            if elem[4] == elem2[4] and elem[6] == elem2[6]:
                 removed.append(elem)
-                newMotives[newMotives.index(elem2)][8] = newMotives[newMotives.index(elem2)][8]+1
+                newM[newM.index(elem2)][8] = newM[newM.index(elem2)][8]+1
                 flag = 1
                 break
         if flag == 0:
-            newMotives.append(elem)
-    return newMotives
+            newM.append(elem)
+    print(newM)
+    return newM
 
 #graf reprezentujący motywy i ich wzajemne podobieńśtwo
 #wieszchołki - motywy, krawędzie - liczba wspólnych elementów
@@ -277,7 +281,7 @@ def countJaccardIndex(a: list, b: list):
                 index_new = 0
 #                for k in range(a[i][j].__len__()): #k-ty motyw
                 for l in range(b[i].__len__()):
-                    index_new = countGroupJaccard(a[i][j], b[i][l])
+                    index_new = countGroupJaccard2(a[i][j], b[i][l])
                     if index_new > index_old : index_old = index_new
                 indexes.append(index_old)
             average = sum(indexes)/len(indexes)
@@ -287,22 +291,22 @@ def countJaccardIndex(a: list, b: list):
     return jaccardIndex
 
 #Wyliczam indeks Jaccarda dla dwóch grup: moc iloczynu zbiorów/moc sumy zbiorów
-def countGroupJaccard(group1: list, group2: list) -> float:
-    value = 0
-    sum = group1.__len__() + group2.__len__()
-    product = 0
-    for i in group1:
-        product = product + countJaccard(i, group2)
-    sum = sum - product
-    value = product/sum
+#Indeks Jaccarda dla dwóch grup z serializacją elementów
+def countGroupJaccard2(group1: list, group2: list) -> float:
+    value = 0.0
+    sGroup1 = serializedGroup(group1)
+    sGroup2 = serializedGroup(group2)
+    sum = set(sGroup1) | set(sGroup2)
+    product = set(sGroup1) & set(sGroup2)
+    value = len(product)/len(sum)
     return value
 
-#Sprawdzenie czy motive znajduje się w grupie group
-#return 1 jeśli tak, 0 jeśli nie
-def countJaccard(motive: list, group: list) -> int:
-    value = 0
-    for i in range(group.__len__()):
-        if motive[3] == group[i][3] and motive[4] == group[i][4] and motive[5] == group[i][5] and motive[6] == group[i][6]:
-            value = 1
-            break
-    return value
+#Serializacja znaczących parametrów realizacji motywów do typu string
+def serializedGroup(group: list) -> set:
+    serialized = []
+    for i in group:
+        string = str(i[3])+str(i[4])+str(i[5])+str(i[6])
+        serialized.append(string)
+    return serialized
+
+
