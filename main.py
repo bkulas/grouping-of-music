@@ -22,10 +22,10 @@ bee133 = corpus.parse('beethoven/opus133.mxl')
 bee591 = corpus.parse('beethoven/opus59no1/movement1.mxl')
 
 a = mgr.analyseComposition(bwv295)
-"""b = mgr.analyseComposition(bwv66)
+b = mgr.analyseComposition(bwv66)
 c = mgr.analyseComposition(bwv24511)
 d = mgr.analyseComposition(bwv24514)
-e = mgr.analyseComposition(bwv24515)"""
+e = mgr.analyseComposition(bwv24515)
 #f = mgr.analyseComposition(bwv24517)
 #g = mgr.analyseComposition(bwv24522)
 #h = mgr.analyseComposition(bwv24526)
@@ -39,11 +39,7 @@ e = mgr.analyseComposition(bwv24515)"""
 #b133 = mgr.analyseComposition(bee133)
 #b591 = mgr.analyseComposition(bee591)
 
-for i in range(a.__len__()):
-    print(a[i])
-#    print(b[i])
-
-"""print("aa")
+print("aa")
 mgr.countJaccardIndex(a,a)
 print("ab")
 mgr.countJaccardIndex(a,b)
@@ -66,7 +62,7 @@ mgr.countJaccardIndex(a,e)
 #print("bee")
 #mgr.countJaccardIndex(b133,b132)
 #print("abee")
-#mgr.countJaccardIndex(a,b132)"""
+#mgr.countJaccardIndex(a,b132)
 
 
 #soprano = bwv295.parts[0]

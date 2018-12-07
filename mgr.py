@@ -11,18 +11,18 @@ for thisNote in a.recurse().notes:
     thisNote.addLyric(thisNote.pitch.pitchClass) #półtony od C trzeba powiązać z oktawą do interwałów
     thisNote.addLyric(thisNote.pitch.octave)
 
+#Kompletna analiza utworu: wyznaczenie motywów na podstawie grafu, którego krawędziami są podobieństwa
+#TODO przenieść wyznaczanie grafu do oddzielnej funkcji i wyliczyć dla motywów ze wszystkich części utworu
+#TODO sprawdzić przykładowe grupy motywów po zmianie wartości odcięcia w removeRepetition
 def analyseComposition(composition):
     charMotives = []
     for p in composition.parts:
         analysis = analyseMelody(p)
         for i in range(2,8):
-            print(i)
             if i-2 >= charMotives.__len__():
-                print('add',i)
                 charMotives.append([])
             motives = getSimpleMotives(analysis,i)
             important = getImportantMotives(motives)
-            print('Important ', important)
             newMotives = removeRepetition(important)
             Mgraph = createMotiveGraph(newMotives)
             reduceMotiveGraph(Mgraph)
@@ -146,21 +146,21 @@ def getImportantMotives(motives: list) -> list:
 
 #usuwa dokładne powtórzenia w motywach: takie same nuty, takie same interwały, takie same wartości rytmiczne
 def removeRepetition(motives: list):
-    print('RemoveRepetition for', motives)
+#    print('RemoveRepetition for', motives)
     removed = []
     newM = []
     for elem in motives:
         flag = 0
         for elem2 in newM:
-            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6] == elem2[6]:
-#            if elem[4] == elem2[4] and elem[6] == elem2[6]:
+#            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6] == elem2[6]:
+            if elem[4] == elem2[4] and elem[6] == elem2[6]:
                 removed.append(elem)
                 newM[newM.index(elem2)][8] = newM[newM.index(elem2)][8]+1
                 flag = 1
                 break
         if flag == 0:
             newM.append(elem)
-    print(newM)
+#    print(newM)
     return newM
 
 #graf reprezentujący motywy i ich wzajemne podobieńśtwo
@@ -203,7 +203,7 @@ def countSimilarity(m1: list, m2: list) -> int:
 def reduceMotiveGraph(g: nx.Graph):
     #print("początkowo krawędzi: ", g.number_of_edges())
     for (u, v, d) in g.edges(data=True):
-        if d['weight'] < 1.5:
+        if d['weight'] < 1.0:
             g.remove_edge(u,v)
     #print("na koniec krawędzi: ", g.number_of_edges())
     #print(g.edges())
@@ -241,68 +241,42 @@ def characteristicMotives(motives: list, indexes: list):
                     else: characteristic[c].append(m)
     return characteristic
 
-#def countJaccardIndex(a: list, b: list):
-#    jaccardIndex = []
-#    for i in range(a.__len__()): #poziom długości motywu
-#        for j in range(a[i].__len__()): #poziom częsci utworu
-#            for k in range(b[i].__len__()):
-#                for l in range(a[i][j].__len__()): #poziom grup motywów
-#                    indexes = []
-#                    for m in range(b[i][k].__len__()):
-#                        index = 0
-#                        sum = (a[i][j][l].__len__()) + (b[i][k][m].__len__())
-#                        for n in range(a[i][j][l].__len__()):
-#                            flag = 0
-#                            for o in range(b[i][k][m].__len__()):
-#                                if a[i][j][l][n][3] == b[i][k][m][o][3] and a[i][j][l][n][4] == b[i][k][m][o][4] \
-#                                    and a[i][j][l][n][5] == b[i][k][m][o][5] and a[i][j][l][n][6] == b[i][k][m][o][6]:
-#                                    index = index + 1
-#                                    sum = sum - 1
-#                        if sum != 0: ind = index/sum
-#                        else: ind = 0
-#                        print(index, sum)
-#                        indexes.append(ind)
-#                jaccardIndex.append(max(indexes))
-#    print(jaccardIndex)
-    #srednia = sum(j for j in jaccardIndex)
-#    print(srednia)
-#    print(sum)
-#    indexJaccarda = index/sum
-#    print(indexJaccarda)
-#    return jaccardIndex
-
+#TODO poprawić wyznaczanie indeksu dla grup
 def countJaccardIndex(a: list, b: list):
-    jaccardIndex = []
+    jaccardIndexes = []
     for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
         if a[i] != []:
             indexes = []
             for j in range(a[i].__len__()): # j-ta grupa motywów
                 index_old = 0
-                index_new = 0
-#                for k in range(a[i][j].__len__()): #k-ty motyw
                 for l in range(b[i].__len__()):
                     index_new = countGroupJaccard2(a[i][j], b[i][l])
                     if index_new > index_old : index_old = index_new
                 indexes.append(index_old)
             average = sum(indexes)/len(indexes)
-            jaccardIndex.append(average)
+            jaccardIndexes.append(average)
             print(indexes)
-    print(jaccardIndex)
+    jaccardIndex = 0
+    for i,ind in enumerate(jaccardIndexes):
+        print(i,i+1,ind)
+        jaccardIndex = jaccardIndex + (i+1)*ind
+    jaccardIndex = jaccardIndex/15
+    print(jaccardIndexes, jaccardIndex)
     return jaccardIndex
 
 #Wyliczam indeks Jaccarda dla dwóch grup: moc iloczynu zbiorów/moc sumy zbiorów
 #Indeks Jaccarda dla dwóch grup z serializacją elementów
 def countGroupJaccard2(group1: list, group2: list) -> float:
     value = 0.0
-    sGroup1 = serializedGroup(group1)
-    sGroup2 = serializedGroup(group2)
+    sGroup1 = serializeGroup(group1)
+    sGroup2 = serializeGroup(group2)
     sum = set(sGroup1) | set(sGroup2)
     product = set(sGroup1) & set(sGroup2)
     value = len(product)/len(sum)
     return value
 
 #Serializacja znaczących parametrów realizacji motywów do typu string
-def serializedGroup(group: list) -> set:
+def serializeGroup(group: list) -> set:
     serialized = []
     for i in group:
         string = str(i[3])+str(i[4])+str(i[5])+str(i[6])
