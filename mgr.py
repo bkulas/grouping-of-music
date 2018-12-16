@@ -241,8 +241,8 @@ def characteristicMotives(motives: list, indexes: list):
                     else: characteristic[c].append(m)
     return characteristic
 
-#TODO poprawić wyznaczanie indeksu dla grup
-def countJaccardIndex(a: list, b: list):
+#proste wyliczanie indeksu jako średnia największych ważone wartości
+def countJaccardIndex2(a: list, b: list):
     jaccardIndexes = []
     for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
         if a[i] != []:
@@ -255,13 +255,34 @@ def countJaccardIndex(a: list, b: list):
                 indexes.append(index_old)
             average = sum(indexes)/len(indexes)
             jaccardIndexes.append(average)
-            print(indexes)
     jaccardIndex = 0
     for i,ind in enumerate(jaccardIndexes):
         print(i,i+1,ind)
         jaccardIndex = jaccardIndex + (i+1)*ind
     jaccardIndex = jaccardIndex/15
     print(jaccardIndexes, jaccardIndex)
+    return jaccardIndex
+
+#Wyliczanie indeksu dla utworów jako średnia warotści dla motywów różnej długości - wybieramy najlepiej pokrywające się pary grup motywów
+def countJaccardIndex(a: list, b: list):
+    jacIndex = []
+    jaccardIndexes = []
+    for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
+        if a[i] != []:
+            indexValues = []
+            for j in range(a[i].__len__()): # j-ta grupa motywów
+                for l in range(b[i].__len__()):
+                    index_new = countGroupJaccard2(a[i][j], b[i][l])
+                    if len(indexValues) <= j:
+                        indexValues.append([index_new])
+                    else: indexValues[j].append(index_new)
+#            print("indexValues", indexValues)
+            if indexValues != []:
+                jacIndex = getBestIndexValues(indexValues)
+#            print("jacIndex", jacIndex)
+            jaccardIndexes.append(sum(jacIndex)/len(jacIndex))
+    jaccardIndex = sum(jaccardIndexes)/len(jaccardIndexes)
+    print(jaccardIndex)
     return jaccardIndex
 
 #Wyliczam indeks Jaccarda dla dwóch grup: moc iloczynu zbiorów/moc sumy zbiorów
@@ -276,11 +297,23 @@ def countGroupJaccard2(group1: list, group2: list) -> float:
     return value
 
 #Serializacja znaczących parametrów realizacji motywów do typu string
-def serializeGroup(group: list) -> set:
+def serializeGroup(group: list):
     serialized = []
     for i in group:
         string = str(i[3])+str(i[4])+str(i[5])+str(i[6])
         serialized.append(string)
     return serialized
 
-
+def getBestIndexValues(indexes: list):
+    best = []
+    rows = len(indexes)
+    columns = len(indexes[0])
+    for it in range(rows) if rows<columns else range(columns):
+        flat = [item for sublist in indexes for item in sublist]
+        best.append(max(flat))
+        r = int(flat.index(max(flat))/(columns-it))
+        c = flat.index(max(flat))%(columns-it)
+        del indexes[r]
+        for i in indexes:
+            del i[c]
+    return best
