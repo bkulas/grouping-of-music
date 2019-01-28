@@ -12,7 +12,7 @@ for thisNote in a.recurse().notes:
     thisNote.addLyric(thisNote.pitch.octave)
 
 #Kompletna analiza utworu: wyznaczenie motywów na podstawie grafu, którego krawędziami są podobieństwa
-#TODO poprawić wynikowe motywy - usunąć zakładki i zbyt duże odchylenia, wyznaczyć "centralny motyw"
+#TODO poprawić wynikowe motywy - usunąć zakładki (motywy występujące po kolei przy kolejnych nutach) i zbyt duże odchylenia, wyznaczyć "centralny motyw"
 def analyseComposition(composition):
     charMotives = []
 #    for p in composition.parts:
@@ -254,55 +254,38 @@ def characteristicMotives(motives: list, indexes: list):
                     else: characteristic[c].append(m)
     return characteristic
 
-#proste wyliczanie indeksu jako średnia największych ważone wartości
-#old
-def countJaccardIndex2(a: list, b: list):
-    jaccardIndexes = []
-    for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
-        if a[i] != []:
-            indexes = []
-            for j in range(a[i].__len__()): # j-ta grupa motywów
-                index_old = 0
-                for l in range(b[i].__len__()):
-                    index_new = countGroupJaccard2(a[i][j], b[i][l])
-                    if index_new > index_old : index_old = index_new
-                indexes.append(index_old)
-            average = sum(indexes)/len(indexes)
-            jaccardIndexes.append(average)
-    jaccardIndex = 0
-    for i,ind in enumerate(jaccardIndexes):
-        print(i,i+1,ind)
-        jaccardIndex = jaccardIndex + (i+1)*ind
-    jaccardIndex = jaccardIndex/15
-    print(jaccardIndexes, jaccardIndex)
-    return jaccardIndex
-
-#TODO sprawdzić dlaczego indeks nie jest symetryczny symetryczny
 #Wyliczanie indeksu dla utworów jako średnia warotści dla grup realizacji motywów różnej wielkości - wybieramy najlepiej pokrywające się pary grup motywów
 def countJaccardIndex(a: list, b: list):
     jacIndex = []
     jaccardIndexes = []
-    for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
-        if a[i] != []:
-            indexValues = []
-            for j in range(a[i].__len__()): # j-ta grupa motywów
-                for l in range(b[i].__len__()):
-                    index_new = countGroupJaccard2(a[i][j], b[i][l])
-                    if len(indexValues) <= j:
-                        indexValues.append([index_new])
-                    else: indexValues[j].append(index_new)
-#            print("indexValues", indexValues)
-            if indexValues != []:
-                jacIndex = getBestIndexValues(indexValues)
+    if len(a) > len(b):
+        itNumber = len(a)
+    else: itNumber = len(b)
+    for i in range (itNumber): # i - motywy o konkretnej liczbie nut
+#        if a[i] != [] and b[i] != []:
+        if len(a[i])>len(b[i]):
+            indexValues = countIndexValues(a[i],b[i])
+        else: indexValues = countIndexValues(b[i],a[i])
+        if indexValues != []:
+            jacIndex = getBestIndexValues(indexValues)
 #            print("jacIndex", jacIndex)
-            jaccardIndexes.append(sum(jacIndex)/len(jacIndex))
+        jaccardIndexes.append(sum(jacIndex)/len(jacIndex))
     jaccardIndex = sum(jaccardIndexes)/len(jaccardIndexes)
-    print(jaccardIndex)
     return jaccardIndex
+
+def countIndexValues(a: list, b: list):
+    indexValues = []
+    for j in range(len(a)): # j-ta grupa motywów
+        for l in range(len(b)):
+            index_new = countGroupJaccard(a[j], b[l])
+            if len(indexValues) <= j:
+                indexValues.append([index_new])
+            else: indexValues[j].append(index_new)
+    return indexValues
 
 #Wyliczam indeks Jaccarda dla dwóch grup: moc iloczynu zbiorów/moc sumy zbiorów
 #Indeks Jaccarda dla dwóch grup z serializacją elementów
-def countGroupJaccard2(group1: list, group2: list) -> float:
+def countGroupJaccard(group1: list, group2: list) -> float:
     value = 0.0
     sGroup1 = serializeGroup(group1)
     sGroup2 = serializeGroup(group2)

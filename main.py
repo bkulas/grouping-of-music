@@ -231,4 +231,5 @@ mgr.countJaccardIndex(a,b)
 #  thisNote.addLyric(thisNote.nameWithOctave)
 #  thisNote.addLyric(thisNote.duration.quarterLength)
 #  thisNote.addLyric(thisNote.pitch.pitchClass)
-#e.show()
+#e.show()"""
+
