@@ -1,28 +1,47 @@
 from music21 import *
 import mgr
-#import constant
-#import matplotlib.pyplot as plt
 
 bwv295 = corpus.parse('bach/bwv295')
 bwv66 = corpus.parse('bwv66.6')
-"""bwv24511 = corpus.parse('bach/bwv245.11.mxl')
-bwv24514 = corpus.parse('bach/bwv245.14.mxl')
-bwv24515 = corpus.parse('bach/bwv245.15.mxl')
-bwv24517 = corpus.parse('bach/bwv245.17.mxl')
-bwv24522 = corpus.parse('bach/bwv245.22.mxl')
-bwv24526 = corpus.parse('bach/bwv245.26.mxl')
-bwv24528 = corpus.parse('bach/bwv245.28.mxl')
-bwv2453 = corpus.parse('bach/bwv245.3.mxl')
-bwv24537 = corpus.parse('bach/bwv245.37.mxl')
-bwv24540 = corpus.parse('bach/bwv245.40.mxl')
-bwv2455 = corpus.parse('bach/bwv245.5.mxl')
 
-bee132 = corpus.parse('beethoven/opus132.mxl')
-bee133 = corpus.parse('beethoven/opus133.mxl')
-bee591 = corpus.parse('beethoven/opus59no1/movement1.mxl')
+corelli = corpus.parse('corelli/opus3no1/1grave.xml')
+cpebach = corpus.parse('cpebach/h186.mxl') ###Akordy
+demo0 = corpus.parse('demos/chorale_with_parallels.mxl') #dziwne
+demo9 = corpus.parse('demos/two-parts.xml')
+luca = corpus.parse('luca/gloria.xml')
+
+compositions = [bwv295, bwv66, corelli, demo0, demo9, luca]
+motives = [mgr.analyseComposition(i) for i in compositions]
+jaccard = [[mgr.countJaccardIndex(a,b) for a in motives] for b in motives]
+
+mgr.showMotives(motives[0])
+
 """
-a = mgr.analyseComposition(bwv295)
-b = mgr.analyseComposition(bwv66)
+#import constant
+#import matplotlib.pyplot as plt
+
+#bwv24511 = corpus.parse('bach/bwv245.11.mxl')
+#bwv24514 = corpus.parse('bach/bwv245.14.mxl')
+#bwv24515 = corpus.parse('bach/bwv245.15.mxl')
+#bwv24517 = corpus.parse('bach/bwv245.17.mxl')
+#bwv24522 = corpus.parse('bach/bwv245.22.mxl')
+#bwv24526 = corpus.parse('bach/bwv245.26.mxl')
+#bwv24528 = corpus.parse('bach/bwv245.28.mxl')
+#bwv2453 = corpus.parse('bach/bwv245.3.mxl')
+#bwv24537 = corpus.parse('bach/bwv245.37.mxl')
+#bwv24540 = corpus.parse('bach/bwv245.40.mxl')
+#bwv2455 = corpus.parse('bach/bwv245.5.mxl')
+
+#bee132 = corpus.parse('beethoven/opus132.mxl')
+#bee133 = corpus.parse('beethoven/opus133.mxl')
+#bee591 = corpus.parse('beethoven/opus59no1/movement1.mxl')
+
+Utwory = ['bach/bwv245.11.mxl', 'bach/bwv245.14.mxl','bach/bwv245.15.mxl','bach/bwv245.17.mxl','bach/bwv245.22.mxl']
+
+for u in Utwory:
+    motywy = mgr.analyseComposition(u)
+    
+
 #c = mgr.analyseComposition(bwv24511)
 #d = mgr.analyseComposition(bwv24514)
 #e = mgr.analyseComposition(bwv24515)

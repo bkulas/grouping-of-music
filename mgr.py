@@ -12,28 +12,39 @@ for thisNote in a.recurse().notes:
     thisNote.addLyric(thisNote.pitch.octave)
 
 #Kompletna analiza utworu: wyznaczenie motywów na podstawie grafu, którego krawędziami są podobieństwa
-#TODO przenieść wyznaczanie grafu do oddzielnej funkcji i wyliczyć dla motywów ze wszystkich części utworu
-#TODO sprawdzić przykładowe grupy motywów po zmianie wartości odcięcia w removeRepetition
+#TODO poprawić wynikowe motywy - usunąć zakładki i zbyt duże odchylenia, wyznaczyć "centralny motyw"
 def analyseComposition(composition):
     charMotives = []
-    for p in composition.parts:
-        analysis = analyseMelody(p)
-        for i in range(2,8):
-            if i-2 >= charMotives.__len__():
-                charMotives.append([])
-            motives = getSimpleMotives(analysis,i)
-            important = getImportantMotives(motives)
-            newMotives = removeRepetition(important)
-            Mgraph = createMotiveGraph(newMotives)
-            reduceMotiveGraph(Mgraph)
-            motivesGroups = getMotivesGroupsFromGraph(Mgraph)
-            mtv = characteristicMotives(newMotives, motivesGroups)
-            if mtv != [[]]: charMotives[i - 2].extend(mtv)
+#    for p in composition.parts:
+    analysis = analyseMelody(composition)
+    for i in range(2,8):
+        if i-2 >= charMotives.__len__():
+            charMotives.append([])
+        motives = getSimpleMotives(analysis,i)
+        important = getImportantMotives(motives)
+        newMotives = removeRepetition(important)
+        Mgraph = createMotiveGraph(newMotives)
+        reduceMotiveGraph(Mgraph)
+        motivesGroups = getMotivesGroupsFromGraph(Mgraph)
+        mtv = characteristicMotives(newMotives, motivesGroups)
+        if mtv != [[]]: charMotives[i - 2].extend(mtv)
+            #charMotives.extend([newMotives])
+    #motivesFinal = analyseMotivesWithGraph(charMotives)
     return charMotives
+
+def analyseMotivesWithGraph(motives: list):
+    motivesFinal = []
+    for i, m in enumerate(motives):
+        Mgraph = createMotiveGraph(m)
+        reduceMotiveGraph(Mgraph)
+        motiveGroups = getMotivesGroupsFromGraph(Mgraph)
+        groups = characteristicMotives(motives, motiveGroups)
+        if groups != [[]]: motivesFinal[i].extend(groups)
+    return motivesFinal
 
 
 def countChromatic(first: int, second: int, semitones: list, octaves: list) -> int:
-    return semitones[second] - semitones[first] + 12*(octaves[second]-octaves[first])
+    return abs(semitones[second] - semitones[first] + 12*(octaves[second]-octaves[first]))
 
 def analyseMelody(melody) -> list:
 #    print('analysis')
@@ -144,7 +155,7 @@ def getImportantMotives(motives: list) -> list:
     #removeRepetition(importantMotives)
     return importantMotives
 
-#usuwa dokładne powtórzenia w motywach: takie same nuty, takie same interwały, takie same wartości rytmiczne
+#usuwa dokładne powtórzenia w motywach: takie same interwały, takie same wartości rytmiczne
 def removeRepetition(motives: list):
 #    print('RemoveRepetition for', motives)
     removed = []
@@ -153,7 +164,7 @@ def removeRepetition(motives: list):
         flag = 0
         for elem2 in newM:
 #            if elem[1] == elem2[1] and elem[4] == elem2[4] and elem[6] == elem2[6]:
-            if elem[4] == elem2[4] and elem[6] == elem2[6]:
+            if elem[4] == elem2[4] and elem[6] == elem2[6] and elem[5]==elem2[5] and elem[3]==elem2[3]:
                 removed.append(elem)
                 newM[newM.index(elem2)][8] = newM[newM.index(elem2)][8]+1
                 flag = 1
@@ -190,8 +201,10 @@ def countSimilarity(m1: list, m2: list) -> int:
         if m1[3][i] == m2[3][i] and m1[5][i] == m2[5][i]:
             similarity = similarity+(1/(m1[5].__len__()))
 #    for i in range(m1[4].__len__()):
-        elif m1[4][i] == m2[4][i]:
+        elif m1[4][i] == m2[4][i] and m1[5][i] == m2[5][i]:
             similarity = similarity+(1/(m1[4].__len__()))
+        elif m1[5][i] == m2[5][i]:
+            similarity = similarity+((1/(m1[4].__len__()))/3)
 #    for i in range(m1[5].__len__()):
         elif m1[3][i] == m2[3][i]:
             similarity = similarity+((1/(m1[3].__len__()))/2)
@@ -203,7 +216,7 @@ def countSimilarity(m1: list, m2: list) -> int:
 def reduceMotiveGraph(g: nx.Graph):
     #print("początkowo krawędzi: ", g.number_of_edges())
     for (u, v, d) in g.edges(data=True):
-        if d['weight'] < 1.0:
+        if d['weight'] < 1.5:
             g.remove_edge(u,v)
     #print("na koniec krawędzi: ", g.number_of_edges())
     #print(g.edges())
@@ -242,6 +255,7 @@ def characteristicMotives(motives: list, indexes: list):
     return characteristic
 
 #proste wyliczanie indeksu jako średnia największych ważone wartości
+#old
 def countJaccardIndex2(a: list, b: list):
     jaccardIndexes = []
     for i in range (a.__len__()): # i - motywy o konkretnej liczbie nut
@@ -263,7 +277,8 @@ def countJaccardIndex2(a: list, b: list):
     print(jaccardIndexes, jaccardIndex)
     return jaccardIndex
 
-#Wyliczanie indeksu dla utworów jako średnia warotści dla motywów różnej długości - wybieramy najlepiej pokrywające się pary grup motywów
+#TODO sprawdzić dlaczego indeks nie jest symetryczny symetryczny
+#Wyliczanie indeksu dla utworów jako średnia warotści dla grup realizacji motywów różnej wielkości - wybieramy najlepiej pokrywające się pary grup motywów
 def countJaccardIndex(a: list, b: list):
     jacIndex = []
     jaccardIndexes = []
@@ -317,3 +332,33 @@ def getBestIndexValues(indexes: list):
         for i in indexes:
             del i[c]
     return best
+
+#TODO poprawić aby wyświetlany plik z motywami nie był 'uszkodzony'
+def showMotives(motives:list):
+    sc = stream.Score()
+    for i in motives:
+        if i != []:
+            for j in i:
+                p1 = stream.Part()
+                for k in j:
+                    s1=stream.Measure()
+                    s1.append(k[0])
+                    p1.append(s1)
+                sc.insert(0,p1)
+    sc.show()
+    return
+
+"""sc1 = stream.Score()
+s1 = stream.Measure()
+s1.TimeSignature = meter.TimeSignature('3/4')
+s1.append(motives[1][0][0][1][0])
+p1 = stream.Part()
+p1.append([s1.TimeSignature, s1])
+s3 = stream.Measure()
+s3.TimeSignature = meter.TimeSignature('3/4')
+s3.append(motives[1][0][0][2][0])
+p2 = stream.Part()
+p2.append([s3.TimeSignature,s3])
+sc1.insert(0,p1)
+sc1.insert(0,p2)
+sc1.show()"""
