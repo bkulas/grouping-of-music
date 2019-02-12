@@ -1,7 +1,34 @@
 from music21 import *
 import mgr
+import grouping
+pathsMonteverdi = corpus.getComposer('monteverdi')
+pathsBach = corpus.getComposer('bach')
+pathsMozart = corpus.getComposer('mozart')
+
+monteverdi = grouping.getMxlFiles(pathsMonteverdi)
+bach = grouping.getMxlFiles(pathsBach)
+mozart = grouping.getMxlFiles(pathsMozart)
+
+monteverdiAll = [corpus.parse(i) for i in monteverdi]
+bachAll = [corpus.parse(i) for i in bach]
+mozartAll = [corpus.parse(i) for i in mozart]
+
+monteverdi = grouping.getMelodyNoChords(monteverdiAll)
+bach = grouping.getMelodyNoChords(bachAll)
+mozart = grouping.getMelodyNoChords(mozartAll)
+
+compositions = bach[0:3] + mozart[0:3] + monteverdi[0:3]
 
 bwv295 = corpus.parse('bach/bwv295')
+"""motives = mgr.analyseCom position(bwv295)
+flatten = [y for x in motives for y in x]
+flat = [y for x in flatten for y in x]
+print(len(flat))
+new = mgr.leaveLongestMotives(motives)
+flatten = [y for x in new for y in x]
+flat = [y for x in flatten for y in x]
+print(len(flat))
+"""
 bwv66 = corpus.parse('bwv66.6')
 
 corelli = corpus.parse('corelli/opus3no1/1grave.xml')
@@ -13,12 +40,13 @@ luca = corpus.parse('luca/gloria.xml')
 compositions = [bwv295, bwv66, corelli, demo0, demo9, luca]
 motives = [mgr.analyseComposition(i) for i in compositions]
 jaccard = [[mgr.countJaccardIndex(a,b) for a in motives] for b in motives]
-
-mgr.showMotives(motives[0])
-
+print(jaccard)
 """
+mgr.showMotives(motives[0])
+bwv295.show()
+
+
 #import constant
-#import matplotlib.pyplot as plt
 
 #bwv24511 = corpus.parse('bach/bwv245.11.mxl')
 #bwv24514 = corpus.parse('bach/bwv245.14.mxl')
@@ -141,10 +169,10 @@ mgr.countJaccardIndex(a,b)
 #for i in range(char2.__len__()):
 #    print(char2[i])
 
-#motiveGraph = mgr.createMotiveGraph(newMotives2)
-#weights2 = [motiveGraph.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph.edges()]
-#plt.hist(weights2)
-#mgr.reduceMotiveGraph(motiveGraph)
+motiveGraph = mgr.createMotiveGraph(newMotives)
+weights2 = [motiveGraph.get_edge_data(i[0],i[1])['weight'] for i in motiveGraph.edges()]
+plt.hist(weights2)
+mgr.reduceMotiveGraph(motiveGraph)
 
 #newMotives2[21][0].show()
 #newMotives2[28][0].show()

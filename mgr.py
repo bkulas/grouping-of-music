@@ -30,6 +30,7 @@ def analyseComposition(composition):
         if mtv != [[]]: charMotives[i - 2].extend(mtv)
             #charMotives.extend([newMotives])
     #motivesFinal = analyseMotivesWithGraph(charMotives)
+    leaveLongestMotives(charMotives)
     return charMotives
 
 def analyseMotivesWithGraph(motives: list):
@@ -41,7 +42,6 @@ def analyseMotivesWithGraph(motives: list):
         groups = characteristicMotives(motives, motiveGroups)
         if groups != [[]]: motivesFinal[i].extend(groups)
     return motivesFinal
-
 
 def countChromatic(first: int, second: int, semitones: list, octaves: list) -> int:
     return abs(semitones[second] - semitones[first] + 12*(octaves[second]-octaves[first]))
@@ -56,13 +56,14 @@ def analyseMelody(melody) -> list:
     rythm8 = []
     semitones = []
     for thisNote in melody.recurse().notes:
-        notesWithOctaves.append(thisNote.nameWithOctave)
-        notesNames.append(thisNote.name)
-        notes.append(thisNote)
-        octaves.append(thisNote.octave)
-        rythm4.append(thisNote.quarterLength)
-        rythm8.append(thisNote.quarterLength * 2)
-        semitones.append(thisNote.pitch.pitchClass)
+        if type(thisNote)  == note.Note:
+            notesWithOctaves.append(thisNote.nameWithOctave)
+            notesNames.append(thisNote.name)
+            notes.append(thisNote)
+            octaves.append(thisNote.octave)
+            rythm4.append(thisNote.quarterLength)
+            rythm8.append(thisNote.quarterLength * 2)
+            semitones.append(thisNote.pitch.pitchClass)
     (intervals, diatonicIntervals, chromaticIntervals, contour) = getIntervals(notes,semitones,octaves)
     return (notes, notesNames, intervals, diatonicIntervals, chromaticIntervals, contour, rythm4, rythm8)
 
@@ -96,7 +97,7 @@ def getSimpleMotives(analysis: list, count: int) -> list:
         for j in range(count):
             s1.append(analysis[0][i+j])
             s2.append(analysis[1][i+j])
-        if i<(analysis[0].__len__()-count):
+        if i<(analysis[0].__len__()-(count-1)):
             for j in range(count-1):
                 s3.append(analysis[2][i + j])
                 s4.append(analysis[3][i + j])
@@ -194,29 +195,27 @@ def createMotiveGraph(motives: list):
 
 def countSimilarity(m1: list, m2: list) -> int:
     similarity = 0
-#    for i in range(m1[1].__len__()):
-#        if m1[1][i] == m2[1][i]:
-#            similarity = similarity+(1/(m1[1].__len__()))
-    for i in range(m1[3].__len__()):
+    for i in range(m1[5].__len__()):
         if m1[3][i] == m2[3][i] and m1[5][i] == m2[5][i]:
             similarity = similarity+(1/(m1[5].__len__()))
-#    for i in range(m1[4].__len__()):
         elif m1[4][i] == m2[4][i] and m1[5][i] == m2[5][i]:
             similarity = similarity+(1/(m1[4].__len__()))
         elif m1[5][i] == m2[5][i]:
             similarity = similarity+((1/(m1[4].__len__()))/3)
-#    for i in range(m1[5].__len__()):
         elif m1[3][i] == m2[3][i]:
             similarity = similarity+((1/(m1[3].__len__()))/2)
+        elif m1[4][i] == m2[4][i]:
+            similarity = similarity+((1/(m1[4].__len__()))/2)
     for i in range(m1[6].__len__()-1):
-        if m1[6][i]/m1[6][i+1] == m2[6][i]/m2[6][i+1]:
-            similarity = similarity+(1/((m1[6].__len__())-1))
+        if m1[6][i+1] != 0 and m2[6][i+1] != 0:
+            if m1[6][i]/m1[6][i+1] == m2[6][i]/m2[6][i+1]:
+                similarity = similarity+(1/((m1[6].__len__())-1))
     return similarity
 
 def reduceMotiveGraph(g: nx.Graph):
     #print("początkowo krawędzi: ", g.number_of_edges())
     for (u, v, d) in g.edges(data=True):
-        if d['weight'] < 1.5:
+        if d['weight'] < 1.8:
             g.remove_edge(u,v)
     #print("na koniec krawędzi: ", g.number_of_edges())
     #print(g.edges())
@@ -298,9 +297,13 @@ def countGroupJaccard(group1: list, group2: list) -> float:
 def serializeGroup(group: list):
     serialized = []
     for i in group:
-        string = str(i[3])+str(i[4])+str(i[5])+str(i[6])
+        string = str(i[3]) + str(i[4]) + str(i[5]) + str(i[6])
         serialized.append(string)
     return serialized
+
+def serializeMotive(motive: list):
+    string = str(motive[3]) + str(motive[4]) + str(motive[5]) + str(motive[6])
+    return string
 
 def getBestIndexValues(indexes: list):
     best = []
@@ -322,14 +325,51 @@ def showMotives(motives:list):
     for i in motives:
         if i != []:
             for j in i:
-                p1 = stream.Part()
-                for k in j:
-                    s1=stream.Measure()
-                    s1.append(k[0])
-                    p1.append(s1)
-                sc.insert(0,p1)
+                if j != []:
+                    p1 = stream.Part()
+                    for k in j:
+                        s1=stream.Measure()
+                        s1.append(k[0])
+                        p1.append(s1)
+                    sc.insert(0,p1)
     sc.show()
     return
+
+def leaveLongestMotives(motives: list):
+    lista = motives
+    flag =1
+    for i in range(len(motives)-1): #motywy długości i+2
+        cl=0
+        for j in range(len(motives[i])): #j-ta grupa
+            c=0
+            for k in range(len(motives[i][j-cl])): #k-ta realizacja
+                if flag == 1:
+                    for l in motives[i+1]:
+                        if flag ==1:
+                            for m in l:
+                               #print(i, j, k, motives[i][j][k-c])
+                                if (str(motives[i][j-cl][k-c][4]))[1:-1] in (str(m[4]))[1:-1] and (str(motives[i][j-cl][k-c][5]))[1:-1] in (str(m[5]))[1:-1] and (str(motives[i][j-cl][k-c][6]))[1:-1] in (str(m[6]))[1:-1]:
+                                    del lista[i][j-cl][k-c]
+                                    if lista[i][j-cl] == []:
+                                        del lista[i][j-cl]
+                                        cl+=1
+                                    c+=1
+                                    flag = 0
+                                    break
+                        else:
+                            flag = 1
+                            break
+                else:
+                    flag = 1
+    return motives
+
+def removeEmptyGroups(motives: list):
+    for i in motives:
+        for j in i:
+            if j == []:
+                print(j)
+                del j
+    return motives
 
 """sc1 = stream.Score()
 s1 = stream.Measure()
