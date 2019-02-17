@@ -1,19 +1,10 @@
 from music21 import *
 import networkx as nx
 
-a = converter.parse("tinynotation: 3/4 g4 e e f4 d d c8 e g2 B4 A G")
-b = converter.parse("tinynotation: 3/4 c4 C d")
-
-for thisNote in a.recurse().notes:
-    thisNote.addLyric(thisNote.nameWithOctave) #pitch
-    thisNote.addLyric(thisNote.name)
-    thisNote.addLyric(thisNote.quarterLength) #rythm per 4th note
-    thisNote.addLyric(thisNote.pitch.pitchClass) #półtony od C trzeba powiązać z oktawą do interwałów
-    thisNote.addLyric(thisNote.pitch.octave)
-
 #Kompletna analiza utworu: wyznaczenie motywów na podstawie grafu, którego krawędziami są podobieństwa
-#TODO poprawić wynikowe motywy - usunąć zakładki (motywy występujące po kolei przy kolejnych nutach) i zbyt duże odchylenia, wyznaczyć "centralny motyw"
-def analyseComposition(composition):
+#TODO wyznaczyć "centralny motyw"
+#TODO zmienić motyty na grupy o konkretnej liczbie realizacji
+def analyseComposition(composition, mode=0):
     charMotives = []
 #    for p in composition.parts:
     analysis = analyseMelody(composition)
@@ -24,7 +15,7 @@ def analyseComposition(composition):
         important = getImportantMotives(motives)
         newMotives = removeRepetition(important)
         Mgraph = createMotiveGraph(newMotives)
-        reduceMotiveGraph(Mgraph)
+        reduceMotiveGraph(Mgraph, mode)
         motivesGroups = getMotivesGroupsFromGraph(Mgraph)
         mtv = characteristicMotives(newMotives, motivesGroups)
         if mtv != [[]]: charMotives[i - 2].extend(mtv)
@@ -153,12 +144,10 @@ def getImportantMotives(motives: list) -> list:
         if similars[m] == 1:
             del importantMotives[m-c]
             c = c+1
-    #removeRepetition(importantMotives)
     return importantMotives
 
 #usuwa dokładne powtórzenia w motywach: takie same interwały, takie same wartości rytmiczne
 def removeRepetition(motives: list):
-#    print('RemoveRepetition for', motives)
     removed = []
     newM = []
     for elem in motives:
@@ -172,7 +161,6 @@ def removeRepetition(motives: list):
                 break
         if flag == 0:
             newM.append(elem)
-#    print(newM)
     return newM
 
 #graf reprezentujący motywy i ich wzajemne podobieńśtwo
@@ -180,18 +168,13 @@ def removeRepetition(motives: list):
 def createMotiveGraph(motives: list):
     g=nx.Graph()
     for i in range(motives.__len__()):
-#        print(motives[i])
         motives[i].append(i)
-#        print(i, motives[i])
         g.add_node(i)
     for i in range(motives.__len__()):
         for j in range(motives.__len__()-i-1):
             similarity = countSimilarity(motives[i],motives[i+j+1])
             g.add_edge(motives[i][9],motives[i+j+1][9],weight = similarity)
-#    print(g.nodes())
-#    print(nx.get_edge_attributes(g,'weight'))
     return g
-    #g.add_nodes_from(motives)
 
 def countSimilarity(m1: list, m2: list) -> int:
     similarity = 0
@@ -212,13 +195,17 @@ def countSimilarity(m1: list, m2: list) -> int:
                 similarity = similarity+(1/((m1[6].__len__())-1))
     return similarity
 
-def reduceMotiveGraph(g: nx.Graph):
-    #print("początkowo krawędzi: ", g.number_of_edges())
+#PRÓG ODCIĘCIA dla podobieństwa realizacji motywów
+def reduceMotiveGraph(g: nx.Graph, mode: int):
+    if mode == 0:
+        treshold = 1.9
+    elif mode == 1:
+        treshold = 1.7
+    else:
+        treshold = 1.5
     for (u, v, d) in g.edges(data=True):
-        if d['weight'] < 1.8:
+        if d['weight'] < treshold:
             g.remove_edge(u,v)
-    #print("na koniec krawędzi: ", g.number_of_edges())
-    #print(g.edges())
     return g
 
 def getMotivesGroupsFromGraph(g: nx.Graph):
@@ -254,21 +241,25 @@ def characteristicMotives(motives: list, indexes: list):
     return characteristic
 
 #Wyliczanie indeksu dla utworów jako średnia warotści dla grup realizacji motywów różnej wielkości - wybieramy najlepiej pokrywające się pary grup motywów
-def countJaccardIndex(a: list, b: list):
+def countJaccardIndex(a: list, b: list, mode=0):
     jacIndex = []
     jaccardIndexes = []
     if len(a) > len(b):
         itNumber = len(a)
     else: itNumber = len(b)
     for i in range (itNumber): # i - motywy o konkretnej liczbie nut
-#        if a[i] != [] and b[i] != []:
         if len(a[i])>len(b[i]):
             indexValues = countIndexValues(a[i],b[i])
         else: indexValues = countIndexValues(b[i],a[i])
         if indexValues != []:
             jacIndex = getBestIndexValues(indexValues)
-#            print("jacIndex", jacIndex)
-        jaccardIndexes.append(sum(jacIndex)/len(jacIndex))
+        if mode == 0 and len(jacIndex)!= 0:
+            jaccardIndexes.append(sum(jacIndex)/len(jacIndex))  ##WAGI DLA MOTYWÓW O DŁUGOŚCI i+2
+        elif mode == 1 and len(jacIndex)!= 0:
+            jaccardIndexes.append((sum(jacIndex) * (i + 1)) / (len(jacIndex) * (i + 1)))
+        elif mode == 2 and len(jacIndex)!= 0:
+            jaccardIndexes.append((sum(jacIndex) * (i + 1)*(i + 1)) / (len(jacIndex) * (i + 1)*(i + 1)))
+        else: jacIndex = 0
     jaccardIndex = sum(jaccardIndexes)/len(jaccardIndexes)
     return jaccardIndex
 

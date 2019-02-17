@@ -10,7 +10,7 @@ def prepareDistanceArray(jaccardMatrix: list):
     distance = [1-i for i in d]
     return distance
 
-def dendrogram(array: list, option=1):
+def dendrogram(array: list, option=1, lbl=None, threshold = 0.9, filename = "tmp"):
     if option == 1:
         order = 'single'
     elif option == 2:
@@ -27,12 +27,17 @@ def dendrogram(array: list, option=1):
         order = 'ward'
     Z = hierarchy.linkage(array, order)
     plt.figure()
-    dn = hierarchy.dendrogram(Z)
-    plt.show()
-    return
+    plt.xlabel("Compositions")
+    plt.ylabel("Distance")
+    dn = hierarchy.dendrogram(Z,labels = lbl,color_threshold = threshold, leaf_rotation = 90)
+#    plt.show()
+    plt.gcf()
+    plt.savefig(filename)
+    plt.close()
+    return 0
 
 def filterMxl(path: list):
-    if path[-3:] == "mxl":
+    if path[-3:] == "mxl" or path[-3:] == "xml":
         return True
     else:
         return False
@@ -76,3 +81,15 @@ def filterMelodyNoChords(melody: list):
         return False
     else:
         return True
+"""
+f = open("test2.txt", "w")
+for i in labels:
+    f.write(i)
+for i in indxsBa:
+    f.write(pathsBach[i])
+for i in indxsMon:
+    f.write(pathsMonteverdi[i])
+for i in indxsTr:
+    f.write(pathsTrecento[i])
+f.close()
+"""

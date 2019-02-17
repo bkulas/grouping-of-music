@@ -1,0 +1,18 @@
+bach132
+bach274
+bach112
+monte35
+monte45
+monte36
+trec5
+trec9
+trec33
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\bach\bwv248.42-s.mxl
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\bach\bwv37.6.mxl
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\bach\bwv245.11.mxl
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\monteverdi\madrigal.3.7.mxl
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\monteverdi\madrigal.4.11.mxl
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\monteverdi\madrigal.3.7.rntxt
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\trecento\PMFC_04-A lle s_andra lo spirt.xml
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\trecento\PMFC_06-Jacopo-01-Aquila-Altera.xml
+C:\Users\Basia\AppData\Local\Programs\Python\Python35-32\lib\site-packages\music21\corpus\trecento\PMFC_12_14-Credo Phillippoctus.xml

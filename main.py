@@ -1,26 +1,119 @@
 from music21 import *
 import mgr
 import grouping
+import random
 pathsMonteverdi = corpus.getComposer('monteverdi')
 pathsBach = corpus.getComposer('bach')
 pathsMozart = corpus.getComposer('mozart')
+pathsHaydn = corpus.getComposer('haydn')
+pathsTrecento = corpus.getComposer('trecento')
 
 monteverdi = grouping.getMxlFiles(pathsMonteverdi)
 bach = grouping.getMxlFiles(pathsBach)
 mozart = grouping.getMxlFiles(pathsMozart)
+haydn = grouping.getMxlFiles(pathsHaydn)
+trecento = grouping.getMxlFiles(pathsTrecento)
 
 monteverdiAll = [corpus.parse(i) for i in monteverdi]
 bachAll = [corpus.parse(i) for i in bach]
 mozartAll = [corpus.parse(i) for i in mozart]
+haydnAll = [corpus.parse(i) for i in haydn]
+trecentoAll = [corpus.parse(i) for i in trecento]
 
 monteverdi = grouping.getMelodyNoChords(monteverdiAll)
 bach = grouping.getMelodyNoChords(bachAll)
 mozart = grouping.getMelodyNoChords(mozartAll)
+haydn = grouping.getMelodyNoChords(haydnAll)
+trecento = grouping.getMelodyNoChords(trecentoAll)
 
-compositions = bach[0:3] + mozart[0:3] + monteverdi[0:3]
+indxsBa = random.sample(range(len(bach)),34)
+#indxsMoz = random.sample(range(len(mozart)),3)
+indxsMon = random.sample(range(len(monteverdi)),33)
+#indxsHa = random.sample(range(len(haydn)),2)
+indxsTr = random.sample(range(len(trecento)),33)
 
-bwv295 = corpus.parse('bach/bwv295')
-"""motives = mgr.analyseCom position(bwv295)
+compositions = [bach[i] for i in indxsBa]  + [monteverdi[i] for i in indxsMon] + [trecento[i] for i in indxsTr]# + [haydn[i] for i in indxsHa] + [mozart[i] for i in indxsMoz]
+
+#compositions = random.sample(bach,3) + random.sample(mozart,3) + random.sample(monteverdi,3) + random.sample(haydn,2) + random.sample(trecento,3)
+#compositions = bach[0:3] + mozart[0:3] + monteverdi[0:3] + haydn[0:2] + trecento[0:3]
+#labels = ['bach']*3 + ['mozart']*3 + ['monte']*3 + ['haydn']*2 + ['trec']*3
+labels = ['bach'+str(i) for i in indxsBa] + ['monte'+str(i) for i in indxsMon]+ ['trec'+str(i) for i in indxsTr]
+
+motives = [mgr.analyseComposition(i,0) for i in compositions]
+motives1 = [mgr.analyseComposition(i,1) for i in compositions]
+motives2 = [mgr.analyseComposition(i,2) for i in compositions]
+
+#próg 1.9
+jaccard90 = [[mgr.countJaccardIndex(a,b,0) for a in motives] for b in motives]#wagi 111
+jaccard91 = [[mgr.countJaccardIndex(a,b,1) for a in motives] for b in motives]#wagi 123
+jaccard92 = [[mgr.countJaccardIndex(a,b,2) for a in motives] for b in motives]#wagi 149
+#próg 1.7
+jaccard70 = [[mgr.countJaccardIndex(a,b,0) for a in motives1] for b in motives1]#wagi 111
+jaccard71 = [[mgr.countJaccardIndex(a,b,1) for a in motives1] for b in motives1]#wagi 123
+jaccard72 = [[mgr.countJaccardIndex(a,b,2) for a in motives1] for b in motives1]#wagi 149
+#próg 1.5
+jaccard50 = [[mgr.countJaccardIndex(a,b,0) for a in motives2] for b in motives2] #wagi 111
+jaccard51 = [[mgr.countJaccardIndex(a,b,1) for a in motives2] for b in motives2] #wagi 123
+jaccard52 = [[mgr.countJaccardIndex(a,b,2) for a in motives2] for b in motives2] #wagi 149
+
+f = open("testB2.txt", "w")
+for i in labels:
+    f.write(i)
+for i in indxsBa:
+    f.write(pathsBach[i])
+for i in indxsMon:
+    f.write(pathsMonteverdi[i])
+for i in indxsTr:
+    f.write(pathsTrecento[i])
+f.close()
+
+dArray = grouping.prepareDistanceArray(jaccard90)
+grouping.dendrogram(dArray,1,labels,0.95, "testB2_9threshold9weights1single")
+grouping.dendrogram(dArray,2,labels,0.95, "testB2_9threshold9weights1complete")
+grouping.dendrogram(dArray,3,labels,0.95, "testB2_9threshold9weights1average")
+
+dArray1 = grouping.prepareDistanceArray(jaccard70)
+grouping.dendrogram(dArray1,1,labels,0.95, "testB2_9threshold7weights1single")
+grouping.dendrogram(dArray1,2,labels,0.95, "testB2_9threshold7weights1complete")
+grouping.dendrogram(dArray1,3,labels,0.95, "testB2_9threshold7weights1average")
+
+dArray2 = grouping.prepareDistanceArray(jaccard50)
+grouping.dendrogram(dArray2,1,labels,0.95, "testB2_9threshold5weights1single")
+grouping.dendrogram(dArray2,2,labels,0.95, "testB2_9threshold5weights1complete")
+grouping.dendrogram(dArray2,3,labels,0.95, "testB2_9threshold5weights1average")
+
+dArray = grouping.prepareDistanceArray(jaccard91)
+grouping.dendrogram(dArray,1,labels,0.95, "testB2_9threshold9weights123single")
+grouping.dendrogram(dArray,2,labels,0.95, "testB2_9threshold9weights123complete")
+grouping.dendrogram(dArray,3,labels,0.95, "testB2_9threshold9weights123average")
+
+dArray1 = grouping.prepareDistanceArray(jaccard71)
+grouping.dendrogram(dArray1,1,labels,0.95, "testB2_9threshold7weights123single")
+grouping.dendrogram(dArray1,2,labels,0.95, "testB2_9threshold7weights123complete")
+grouping.dendrogram(dArray1,3,labels,0.95, "testB2_9threshold7weights123average")
+
+dArray2 = grouping.prepareDistanceArray(jaccard51)
+grouping.dendrogram(dArray2,1,labels,0.95, "testB2_9threshold5weights123single")
+grouping.dendrogram(dArray2,2,labels,0.95, "testB2_9threshold5weights123complete")
+grouping.dendrogram(dArray2,3,labels,0.95, "testB2_9threshold5weights123average")
+
+dArray = grouping.prepareDistanceArray(jaccard92)
+grouping.dendrogram(dArray,1,labels,0.95, "testB2_9threshold9weights149single")
+grouping.dendrogram(dArray,2,labels,0.95, "testB2_9threshold9weights149complete")
+grouping.dendrogram(dArray,3,labels,0.95, "testB2_9threshold9weights149average")
+
+dArray1 = grouping.prepareDistanceArray(jaccard72)
+grouping.dendrogram(dArray1,1,labels,0.95, "testB2_9treshold7weights149single")
+grouping.dendrogram(dArray1,2,labels,0.95, "testB2_9treshold7weights149complete")
+grouping.dendrogram(dArray1,3,labels,0.95, "testB2_9treshold7weights149average")
+
+dArray2 = grouping.prepareDistanceArray(jaccard52)
+grouping.dendrogram(dArray2,1,labels,0.95, "testB2_9treshold5weights149single")
+grouping.dendrogram(dArray2,2,labels,0.95, "testB2_9treshold5weights149complete")
+grouping.dendrogram(dArray2,3,labels,0.95, "testB2_9treshold5weights149average")
+
+"""bwv295 = corpus.parse('bach/bwv295')
+motives = mgr.analyseCom position(bwv295)
 flatten = [y for x in motives for y in x]
 flat = [y for x in flatten for y in x]
 print(len(flat))
@@ -28,7 +121,7 @@ new = mgr.leaveLongestMotives(motives)
 flatten = [y for x in new for y in x]
 flat = [y for x in flatten for y in x]
 print(len(flat))
-"""
+
 bwv66 = corpus.parse('bwv66.6')
 
 corelli = corpus.parse('corelli/opus3no1/1grave.xml')
@@ -38,13 +131,10 @@ demo9 = corpus.parse('demos/two-parts.xml')
 luca = corpus.parse('luca/gloria.xml')
 
 compositions = [bwv295, bwv66, corelli, demo0, demo9, luca]
-motives = [mgr.analyseComposition(i) for i in compositions]
-jaccard = [[mgr.countJaccardIndex(a,b) for a in motives] for b in motives]
 print(jaccard)
-"""
+
 mgr.showMotives(motives[0])
 bwv295.show()
-
 
 #import constant
 
