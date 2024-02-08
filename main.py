@@ -1,3 +1,4 @@
+#%%
 from music21 import *
 import mgr
 import grouping
@@ -7,42 +8,43 @@ pathsBach = corpus.getComposer('bach')
 pathsMozart = corpus.getComposer('mozart')
 pathsHaydn = corpus.getComposer('haydn')
 pathsTrecento = corpus.getComposer('trecento')
-
+#%%
 monteverdi = grouping.getMxlFiles(pathsMonteverdi)
 bach = grouping.getMxlFiles(pathsBach)
 mozart = grouping.getMxlFiles(pathsMozart)
 haydn = grouping.getMxlFiles(pathsHaydn)
 trecento = grouping.getMxlFiles(pathsTrecento)
-
+#%%
 monteverdiAll = [corpus.parse(i) for i in monteverdi]
 bachAll = [corpus.parse(i) for i in bach]
 mozartAll = [corpus.parse(i) for i in mozart]
 haydnAll = [corpus.parse(i) for i in haydn]
 trecentoAll = [corpus.parse(i) for i in trecento]
-
+#%%
 monteverdi = grouping.getMelodyNoChords(monteverdiAll)
 bach = grouping.getMelodyNoChords(bachAll)
 mozart = grouping.getMelodyNoChords(mozartAll)
 haydn = grouping.getMelodyNoChords(haydnAll)
 trecento = grouping.getMelodyNoChords(trecentoAll)
-
+#%%
 indxsBa = random.sample(range(len(bach)),34)
 #indxsMoz = random.sample(range(len(mozart)),3)
 indxsMon = random.sample(range(len(monteverdi)),33)
 #indxsHa = random.sample(range(len(haydn)),2)
 indxsTr = random.sample(range(len(trecento)),33)
-
+#%%
 compositions = [bach[i] for i in indxsBa]  + [monteverdi[i] for i in indxsMon] + [trecento[i] for i in indxsTr]# + [haydn[i] for i in indxsHa] + [mozart[i] for i in indxsMoz]
 
 #compositions = random.sample(bach,3) + random.sample(mozart,3) + random.sample(monteverdi,3) + random.sample(haydn,2) + random.sample(trecento,3)
 #compositions = bach[0:3] + mozart[0:3] + monteverdi[0:3] + haydn[0:2] + trecento[0:3]
 #labels = ['bach']*3 + ['mozart']*3 + ['monte']*3 + ['haydn']*2 + ['trec']*3
 labels = ['bach'+str(i) for i in indxsBa] + ['monte'+str(i) for i in indxsMon]+ ['trec'+str(i) for i in indxsTr]
-
+#%%
 motives = [mgr.analyseComposition(i,0) for i in compositions]
+#%%
 motives1 = [mgr.analyseComposition(i,1) for i in compositions]
 motives2 = [mgr.analyseComposition(i,2) for i in compositions]
-
+#%%
 #próg 1.9
 jaccard90 = [[mgr.countJaccardIndex(a,b,0) for a in motives] for b in motives]#wagi 111
 jaccard91 = [[mgr.countJaccardIndex(a,b,1) for a in motives] for b in motives]#wagi 123
@@ -55,7 +57,7 @@ jaccard72 = [[mgr.countJaccardIndex(a,b,2) for a in motives1] for b in motives1]
 jaccard50 = [[mgr.countJaccardIndex(a,b,0) for a in motives2] for b in motives2] #wagi 111
 jaccard51 = [[mgr.countJaccardIndex(a,b,1) for a in motives2] for b in motives2] #wagi 123
 jaccard52 = [[mgr.countJaccardIndex(a,b,2) for a in motives2] for b in motives2] #wagi 149
-
+#%%
 f = open("testB2.txt", "w")
 for i in labels:
     f.write(i)
@@ -66,12 +68,12 @@ for i in indxsMon:
 for i in indxsTr:
     f.write(pathsTrecento[i])
 f.close()
-
+#%%
 dArray = grouping.prepareDistanceArray(jaccard90)
 grouping.dendrogram(dArray,1,labels,0.95, "testB2_9threshold9weights1single")
 grouping.dendrogram(dArray,2,labels,0.95, "testB2_9threshold9weights1complete")
 grouping.dendrogram(dArray,3,labels,0.95, "testB2_9threshold9weights1average")
-
+#%%
 dArray1 = grouping.prepareDistanceArray(jaccard70)
 grouping.dendrogram(dArray1,1,labels,0.95, "testB2_9threshold7weights1single")
 grouping.dendrogram(dArray1,2,labels,0.95, "testB2_9threshold7weights1complete")

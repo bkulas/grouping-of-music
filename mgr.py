@@ -3,7 +3,7 @@ import networkx as nx
 
 #Kompletna analiza utworu: wyznaczenie motywów na podstawie grafu, którego krawędziami są podobieństwa
 #TODO wyznaczyć "centralny motyw"
-#TODO zmienić motyty na grupy o konkretnej liczbie realizacji
+#TODO zmienić motywy na grupy o konkretnej liczbie realizacji
 def analyseComposition(composition, mode=0):
     charMotives = []
 #    for p in composition.parts:
@@ -178,9 +178,9 @@ def createMotiveGraph(motives: list):
 
 def countSimilarity(m1: list, m2: list) -> int:
     similarity = 0
-    for i in range(m1[5].__len__()):
+    for i in range(len(m1[5])):
         if m1[3][i] == m2[3][i] and m1[5][i] == m2[5][i]:
-            similarity = similarity+(1/(m1[5].__len__()))
+            similarity = similarity+(1/(len(m1[5])))
         elif m1[4][i] == m2[4][i] and m1[5][i] == m2[5][i]:
             similarity = similarity+(1/(m1[4].__len__()))
         elif m1[5][i] == m2[5][i]:
@@ -198,32 +198,38 @@ def countSimilarity(m1: list, m2: list) -> int:
 #PRÓG ODCIĘCIA dla podobieństwa realizacji motywów
 def reduceMotiveGraph(g: nx.Graph, mode: int):
     if mode == 0:
-        treshold = 1.9
+        threshold = 1.9
     elif mode == 1:
-        treshold = 1.7
+        threshold = 1.7
     else:
-        treshold = 1.5
+        threshold = 1.5
+    edges_to_remove = []
     for (u, v, d) in g.edges(data=True):
-        if d['weight'] < treshold:
-            g.remove_edge(u,v)
+        if d['weight'] < threshold:
+            edges_to_remove.append([u,v])
+            #g.remove_edge(u,v)
+    for i in edges_to_remove:
+        g.remove_edge(i[0],i[1])
     return g
 
 def getMotivesGroupsFromGraph(g: nx.Graph):
     motives = []
-    for i in range(g.edges().__len__()):
+    edgesList = list(g.edges)
+    for i in range(len(edgesList)):
         flag = 0
         for n in range(motives.__len__()):
-            if g.edges()[i][0] in motives[n]:
+            if edgesList[i][0] in motives[n]:
                 flag = 1
-                if g.edges()[i][1] in motives[n]:
+                if edgesList[i][1] in motives[n]:
                     break
-                else: motives[n].append(g.edges()[i][1])
-            elif g.edges()[i][1] in motives[n]:
+                else: motives[n].append(edgesList[i][1])
+            elif edgesList[i][1] in motives[n]:
                 flag = 1
-                if g.edges()[i][0] in motives[n]:
+                if edgesList[i][0] in motives[n]:
                     break
-                else: motives[n].append(g.edges()[i][0])
-        if flag == 0: motives.append([g.edges()[i][0],g.edges()[i][1]])
+                else: motives[n].append(edgesList[i][0])
+        #print(edgesList(i))
+        if flag == 0: motives.append([edgesList[i][0],edgesList[i][1]])
     #print(motives)
     return motives
 
@@ -265,7 +271,7 @@ def countJaccardIndex(a: list, b: list, mode=0):
 
 def countIndexValues(a: list, b: list):
     indexValues = []
-    for j in range(len(a)): # j-ta grupa motywów
+    for j in range(len(a)): # j-ty motyw - grupa realizacji
         for l in range(len(b)):
             index_new = countGroupJaccard(a[j], b[l])
             if len(indexValues) <= j:
@@ -324,6 +330,10 @@ def showMotives(motives:list):
                         p1.append(s1)
                     sc.insert(0,p1)
     sc.show()
+    return
+
+#TODO nice to have this option
+def showMotivesInsideOriginalMelody(motives:list):
     return
 
 def leaveLongestMotives(motives: list):

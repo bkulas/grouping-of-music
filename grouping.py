@@ -37,7 +37,7 @@ def dendrogram(array: list, option=1, lbl=None, threshold = 0.9, filename = "tmp
     return 0
 
 def filterMxl(path: list):
-    if path[-3:] == "mxl" or path[-3:] == "xml":
+    if str(path)[-3:] == "mxl" or str(path)[-3:] == "xml":
         return True
     else:
         return False
